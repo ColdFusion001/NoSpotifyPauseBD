@@ -1,8 +1,8 @@
 /**
  * @name BlockSpotifyPause
- * @version 1.0.3
- * @description Blocks requests to the Spotify pausing endpoint.
- * @author ColdFusion001
+ * @version 1.0.4
+ * @description Blocks requests to the Spotify pause endpoint.
+ * @autor Rnicholas#2092
  */
 
 const config = {
@@ -15,10 +15,10 @@ const config = {
                 github_username: "ColdFusion001"
             }
         ],
-        version: "1.0.3",
+        version: "1.0.4",
         description: "Blocks requests to the Spotify pause endpoint.",
-        github: "https://github.com/yourusername",
-        github_raw: "https://raw.githubusercontent.com/yourusername/yourrepo/main/BlockSpotifyPause.plugin.js"
+        github: "https://github.com/ColdFusion001",
+        github_raw: "https://raw.githubusercontent.com/ColdFusion001/NoSpotifyPauseBD/main/BlockSpotifyPause.plugin.js"
     }
 };
 
@@ -63,13 +63,18 @@ module.exports = (() => {
         }
 
         patchXhr() {
+            const self = this;
             this.originalXhrOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function(method, url, ...args) {
                 if (typeof url === 'string' && url.includes('https://api.spotify.com/v1/me/player/pause')) {
                     console.log(`[${config.info.name}] Blocked XMLHttpRequest to: ${url}`);
-                    this.abort();  // Abort the request
+                    this.addEventListener('readystatechange', function() {
+                        if (this.readyState === 1) {
+                            this.abort();
+                        }
+                    });
                 } else {
-                    this.originalXhrOpen.call(this, method, url, ...args);
+                    self.originalXhrOpen.call(this, method, url, ...args);
                 }
             };
             console.log(`[${config.info.name}] Patched XMLHttpRequest open method`);
